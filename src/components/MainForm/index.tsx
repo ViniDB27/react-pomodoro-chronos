@@ -16,7 +16,7 @@ export function MainForm() {
         />
       </div>
       <div className={styles.formRow}>
-        <p>Lorem ipsum dolor sit amet.</p>
+        <p>Proximo intevalo é de .</p>
       </div>
       <div className={styles.formRow}>
         <Cycles />
