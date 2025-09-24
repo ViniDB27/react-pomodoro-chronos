@@ -45,6 +45,8 @@ export function TaskContextProvider({ children }: TaskContextProviderProps) {
   useEffect(() => {
     if (state.activeTask && playBeepRef.current === null) {
       playBeepRef.current = loadBeep()
+    } else {
+      playBeepRef.current = null
     }
   }, [state.activeTask])
 
