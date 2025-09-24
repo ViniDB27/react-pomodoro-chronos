@@ -1,123 +1,97 @@
-import styles from './styles.module.css'
-import { DefaultInput } from '../DefaultInput'
-import { Cycles } from '../Cycles'
-import { DefaultButton } from '../DefaultButton'
-import { PlayCircleIcon } from 'lucide-react'
-import { useRef } from 'react'
-import type { TaskModel } from '../../models/TaskModel'
-import { useTaskContext } from '../../contexts/TaskContext/useTaskContext'
-import { getNextCycle } from '../../utils/getNextCycle'
-import { getNextCycleType } from '../../utils/getNextCycleType'
-import { formatSecondsToMinutes } from '../../utils/formatSecondsToMinute'
+import { PlayCircleIcon, StopCircleIcon } from 'lucide-react';
+import { Cycles } from '../Cycles';
+import { DefaultButton } from '../DefaultButton';
+import { DefaultInput } from '../DefaultInput';
+import { useRef } from 'react';
+import { useTaskContext } from '../../contexts/TaskContext/useTaskContext';
+import { getNextCycle } from '../../utils/getNextCycle';
+import { getNextCycleType } from '../../utils/getNextCycleType';
+import { TaskActionTypes } from '../../contexts/TaskContext/taskActions';
+import type { TaskModel } from '../../models/TaskModel';
 
 export function MainForm() {
-  const { state, setState } = useTaskContext()
-  const taskNameInput = useRef<HTMLInputElement>(null)
+  const { state, dispatch } = useTaskContext();
+  const taskNameInput = useRef<HTMLInputElement>(null);
 
-  //ciclos
-  const nextCycle = getNextCycle(state.currentCycle)
-  const nextCycleType = getNextCycleType(state.currentCycle)
+  // ciclos
+  const nextCycle = getNextCycle(state.currentCycle);
+  const nextCyleType = getNextCycleType(nextCycle);
 
   function handleCreateNewTask(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault()
+    event.preventDefault();
 
-    if (taskNameInput.current === null) return
+    if (taskNameInput.current === null) return;
 
-    const taskName = taskNameInput.current?.value.trim()
+    const taskName = taskNameInput.current.value.trim();
 
     if (!taskName) {
-      alert('Digite o nome da tarefa!')
-      return
+      alert('Digite o nome da tarefa');
+      return;
     }
 
     const newTask: TaskModel = {
       id: Date.now().toString(),
       name: taskName,
       startDate: Date.now(),
-      completedDate: null,
-      interruptedDate: null,
-      duration: state.config[nextCycleType],
-      type: nextCycleType,
-    }
+      completeDate: null,
+      interruptDate: null,
+      duration: state.config[nextCyleType],
+      type: nextCyleType,
+    };
 
-    const secondsRemaining = newTask.duration * 60 // transformando de minutos em segundos
-
-    setState(prevState => {
-      return {
-        ...prevState,
-        activeTask: newTask,
-        currentCycle: nextCycle,
-        secondsRemaining,
-        formattedSecondsRemaining: formatSecondsToMinutes(secondsRemaining),
-        tasks: [...prevState.tasks, newTask],
-      }
-    })
+    dispatch({ type: TaskActionTypes.START_TASK, payload: newTask });
   }
 
   function handleInterruptTask() {
-    setState(prevState => {
-      return {
-        ...prevState,
-        activeTask: null,
-        secondsRemaining: 0,
-        formattedSecondsRemaining: '00:00',
-        tasks: prevState.tasks.map(task => {
-          if (prevState.activeTask && prevState.activeTask.id === task.id) {
-            return {
-              ...task,
-              interruptedDate: Date.now(),
-            }
-          }
-          return task
-        }),
-      }
-    })
+    dispatch({ type: TaskActionTypes.INTERRUPT_TASK });
   }
 
   return (
-    <form className={styles.form} onSubmit={handleCreateNewTask}>
-      <div className={styles.formRow}>
+    <form onSubmit={handleCreateNewTask} className='form' action=''>
+      <div className='formRow'>
         <DefaultInput
-          labelText='Task'
-          id='menuInput'
+          labelText='task'
+          id='meuInput'
           type='text'
           placeholder='Digite algo'
           ref={taskNameInput}
           disabled={!!state.activeTask}
         />
       </div>
-      <div className={styles.formRow}>
-        <p>Proximo intevalo é de 1.</p>
+
+      <div className='formRow'>
+        <p>Próximo intervalo é de 25min</p>
       </div>
 
       {state.currentCycle > 0 && (
-        <div className={styles.formRow}>
+        <div className='formRow'>
           <Cycles />
         </div>
       )}
-      <div className={styles.formRow}>
+
+      <div className='formRow'>
         {!state.activeTask && (
           <DefaultButton
-            key='start_button'
-            type='submit'
             aria-label='Iniciar nova tarefa'
             title='Iniciar nova tarefa'
+            type='submit'
             icon={<PlayCircleIcon />}
+            key='botao_submit'
           />
         )}
 
         {!!state.activeTask && (
           <DefaultButton
-            key='reset_button'
+            aria-label='Interromper tarefa atual'
+            title='Interromper tarefa atual'
             type='button'
-            aria-label='Encerrar tarefa'
-            title='Encerrar tarefa'
             color='red'
-            icon={<PlayCircleIcon />}
+            icon={<StopCircleIcon />}
             onClick={handleInterruptTask}
+            key='botao_button'
           />
         )}
       </div>
     </form>
-  )
+  );
 }
