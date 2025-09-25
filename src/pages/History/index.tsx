@@ -33,6 +33,10 @@ export function History() {
   }
 
   useEffect(() => {
+    document.title = 'Histórico - Chronos Pomodoro'
+  }, [])
+
+  useEffect(() => {
     setSortTaskOption(prevState => ({
       ...prevState,
       tasks: sortTasks({
@@ -48,6 +52,12 @@ export function History() {
     setConfirmClearHistory(false)
     dispatch({ type: TaskActionTypes.RESET_STATE })
   }, [confirmClearHistory, dispatch])
+
+  useEffect(() => {
+    return () => {
+      showMessage.dismiss()
+    }
+  }, [])
 
   function handleSortTask({ field }: Pick<SortTasksOptions, 'field'>) {
     const newDirection = sortTaskOption.direction === 'desc' ? 'asc' : 'desc'
