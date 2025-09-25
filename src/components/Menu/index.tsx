@@ -47,7 +47,7 @@ export function Menu() {
         <HouseIcon size={64} />
       </RouterLink>
       <RouterLink
-        href='#'
+        href='/history'
         className={styles.menuLink}
         aria-label='Ver Histórico'
         title='Ver Histórico'
@@ -55,7 +55,7 @@ export function Menu() {
         <HistoryIcon size={64} />
       </RouterLink>
       <RouterLink
-        href='#'
+        href='/settings'
         className={styles.menuLink}
         aria-label='Configurações'
         title='Configurações'

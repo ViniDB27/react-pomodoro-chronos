@@ -11,7 +11,17 @@ type TaskContextProviderProps = {
 }
 
 export function TaskContextProvider({ children }: TaskContextProviderProps) {
-  const [state, dispatch] = useReducer(taskReducer, initialTaskState)
+  const [state, dispatch] = useReducer(taskReducer, initialTaskState, () => {
+    const storageState = localStorage.getItem('chronos:state')
+    if (!storageState) return initialTaskState
+    const parsedStorageState = JSON.parse(storageState)
+    return {
+      ...parsedStorageState,
+      activeTask: null,
+      secondsRemaining: 0,
+      formattedSecondsRemaining: '00:00',
+    }
+  })
   const worker = TimerWorkerManager.getInstance()
   const playBeepRef = useRef<() => void | null>(null)
 
@@ -34,10 +44,14 @@ export function TaskContextProvider({ children }: TaskContextProviderProps) {
   })
 
   useEffect(() => {
+    localStorage.setItem('chronos:state', JSON.stringify(state))
+
     if (!state.activeTask) {
       console.log('Worker terminado por falta de active task')
       worker.terminate()
     }
+
+    document.title = `${state.formattedSecondsRemaining} - Chronos Pomodoro`
 
     worker.postMessage(state)
   }, [worker, state])
